@@ -95,7 +95,8 @@ void FileManager::readFile(string fileName, vector<unsigned char> &data) {
     auto ch = channel_for(this);
     if (!ready || !ch) return;
     vector<uint8_t> payload;
-    append_string(payload, fileName);
+    auto remoteName = path(fileName).filename().string();
+    append_string(payload, remoteName);
     auto resp = ch->request(RpcOp::DOWNLOAD, payload, "DOWNLOAD");
     size_t off = 0;
     try {
@@ -121,7 +122,8 @@ void FileManager::writeFile(string fileName, vector<unsigned char> &data) {
     auto ch = channel_for(this);
     if (!ready || !ch) return;
     vector<uint8_t> payload;
-    append_string(payload, fileName);
+    auto remoteName = path(fileName).filename().string();
+    append_string(payload, remoteName);
     append_u32(payload, static_cast<uint32_t>(data.size()));
     payload.insert(payload.end(), data.begin(), data.end());
     auto resp = ch->request(RpcOp::UPLOAD, payload, "UPLOAD");
