@@ -3,6 +3,7 @@
 #include "rpc_utils.h"
 #include <arpa/inet.h>
 #include <atomic>
+#include <filesystem>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <thread>
@@ -50,8 +51,22 @@ void handle_client(int fd, int connId, const ServerOptions &opts) {
             switch (frame.opcode) {
                 case RpcOp::CTOR: {
                     size_t off = 0;
-                    std::string dir = read_string(frame.payload, off);
-                    if (dir.empty()) dir = opts.dir;
+                    std::string requested = read_string(frame.payload, off);
+                    std::string dir = opts.dir.empty() ? requested : opts.dir;
+
+                    try {
+                        if (!dir.empty()) {
+                            std::filesystem::create_directories(dir);
+                        }
+                    } catch (const std::exception &e) {
+                        LOG_WARN("S", connId, "CTOR", "cannot ensure dir exists " << e.what());
+                    }
+
+                    if (dir.empty()) {
+                        respond_err(fd, connId, 4);
+                        break;
+                    }
+
                     fm = std::make_unique<FileManager>(dir);
                     ready = true;
                     std::vector<uint8_t> payload;
