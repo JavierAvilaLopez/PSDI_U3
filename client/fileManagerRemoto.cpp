@@ -2,8 +2,9 @@
 #include "clientManager.h"
 #include "utils.h"
 
-#include <unordered_map>
+#include <iostream>
 #include <mutex>
+#include <unordered_map>
 
 namespace {
 struct RemoteState {
@@ -44,7 +45,11 @@ FileManager::FileManager() {
     RemoteState state;
     state.active = false;
     if (state.connection.connectTo(defaultHost(), defaultPort())) {
-        sendCreate(state, "");
+        if (!sendCreate(state, "")) {
+            state.connection.closeConnection();
+        }
+    } else {
+        std::cerr << "[client] Cannot connect to remote FileManager" << std::endl;
     }
     ready = state.active;
     g_states[this] = std::move(state);
@@ -55,7 +60,11 @@ FileManager::FileManager(std::string path) {
     RemoteState state;
     state.active = false;
     if (state.connection.connectTo(defaultHost(), defaultPort())) {
-        sendCreate(state, path);
+        if (!sendCreate(state, path)) {
+            state.connection.closeConnection();
+        }
+    } else {
+        std::cerr << "[client] Cannot connect to remote FileManager" << std::endl;
     }
     dirPath = path;
     ready = state.active;
