@@ -4,6 +4,8 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
+#include <cctype>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -34,9 +36,21 @@ void log_message(LogLevel lvl, const std::string &role, int connId, const std::s
     do { if (get_log_level() >= LogLevel::ERROR) log_message(LogLevel::ERROR, role, conn, op, LOG_STREAM(msg)); } while(0)
 
 inline LogLevel level_from_string(const std::string &v) {
-    if (v == "debug") return LogLevel::DEBUG;
-    if (v == "info") return LogLevel::INFO;
-    if (v == "warn") return LogLevel::WARN;
+    try {
+        size_t idx = 0;
+        int n = std::stoi(v, &idx);
+        if (idx == v.size()) {
+            return n <= 0 ? LogLevel::INFO : LogLevel::DEBUG;
+        }
+    } catch (const std::exception &) {
+        // not a number, fall through to textual parsing
+    }
+
+    std::string lower = v;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (lower == "debug") return LogLevel::DEBUG;
+    if (lower == "info") return LogLevel::INFO;
+    if (lower == "warn") return LogLevel::WARN;
     return LogLevel::ERROR;
 }
 

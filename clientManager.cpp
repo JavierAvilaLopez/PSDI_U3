@@ -42,7 +42,7 @@ bool RpcChannel::connect_now() {
 void RpcChannel::close_now() {
     if (fd_ >= 0) {
         ::close(fd_);
-        LOG_INFO(role_, connId_, "close", "connection closed");
+        LOG_DEBUG(role_, connId_, "close", "connection closed");
     }
     fd_ = -1;
 }
@@ -60,7 +60,7 @@ RpcFrame RpcChannel::request(RpcOp op, const std::vector<uint8_t> &payload, cons
     }
     auto end = std::chrono::steady_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    LOG_INFO(role_, connId_, opName, "roundtrip=" << ms << "ms");
+    LOG_DEBUG(role_, connId_, opName, "roundtrip=" << ms << "ms");
     return response;
 }
 

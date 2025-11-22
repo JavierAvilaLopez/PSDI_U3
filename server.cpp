@@ -14,6 +14,8 @@ struct ServerOptions {
     int port{5001};
     std::string dir{"FileManagerDir"};
     std::string logFile;
+    LogLevel logLevel{LogLevel::INFO};
+    bool logLevelOverride{false};
     bool verbose{false};
 };
 
@@ -30,6 +32,7 @@ ServerOptions parse_args(int argc, char **argv) {
         else if (a == "--port" && i + 1 < argc) opts.port = std::atoi(argv[++i]);
         else if (a == "--dir" && i + 1 < argc) opts.dir = argv[++i];
         else if (a == "--log-file" && i + 1 < argc) opts.logFile = argv[++i];
+        else if (a == "--log-level" && i + 1 < argc) { opts.logLevel = level_from_string(argv[++i]); opts.logLevelOverride = true; }
         else if (a == "--verbose") opts.verbose = true;
     }
     return opts;
@@ -110,7 +113,7 @@ void handle_client(int fd, int connId, const ServerOptions &opts) {
                     break;
                 }
                 case RpcOp::BYE: {
-                    LOG_INFO("S", connId, "BYE", "client signaled bye");
+                    LOG_DEBUG("S", connId, "BYE", "client signaled bye");
                     close(fd);
                     return;
                 }
@@ -123,7 +126,7 @@ void handle_client(int fd, int connId, const ServerOptions &opts) {
         }
     }
     close(fd);
-    LOG_INFO("S", connId, "disconnect", "connection closed");
+    LOG_DEBUG("S", connId, "disconnect", "connection closed");
 }
 
 int main(int argc, char **argv) {
@@ -131,7 +134,10 @@ int main(int argc, char **argv) {
     LogConfig cfg;
     cfg.role = "S";
     cfg.logFile = opts.logFile;
-    cfg.level = opts.verbose ? LogLevel::DEBUG : level_from_string(env_or("FILEMGR_LOG", "info"));
+    LogLevel lvl = level_from_string(env_or("FILEMGR_LOG", "0"));
+    if (opts.verbose) lvl = LogLevel::DEBUG;
+    if (opts.logLevelOverride) lvl = opts.logLevel;
+    cfg.level = lvl;
     init_log(cfg);
 
     int fd = ::socket(AF_INET, SOCK_STREAM, 0);
