@@ -21,10 +21,12 @@ bool sendCreate(RemoteState& state, const std::string& path) {
     appendUint32(request, METHOD_CREATE);
     appendUint32(request, static_cast<uint32_t>(path.size()));
     request.insert(request.end(), path.begin(), path.end());
+    std::cout << "[client] >> sendPayload (CREATE)" << std::endl; // DEBUG: added
     if (!state.connection.sendPayload(request)) {
         return false;
     }
     std::vector<uint8_t> response;
+    std::cout << "[client] << receivePayload (CREATE)" << std::endl; // DEBUG: added
     if (!state.connection.receivePayload(response)) {
         return false;
     }
@@ -99,9 +101,11 @@ vector<string> FileManager::listFiles() {
     std::vector<uint8_t> request;
     appendUint32(request, METHOD_LIST);
     appendUint32(request, state.remoteId);
+    std::cout << "[client] >> sendPayload (LIST)" << std::endl; // DEBUG: added
     if (!state.connection.sendPayload(request)) return result;
 
     std::vector<uint8_t> response;
+    std::cout << "[client] << receivePayload (LIST)" << std::endl; // DEBUG: added
     if (!state.connection.receivePayload(response)) return result;
 
     size_t offset = 0;
@@ -131,9 +135,11 @@ void FileManager::readFile(string fileName, vector<unsigned char>& data) {
     appendUint32(request, state.remoteId);
     appendUint32(request, static_cast<uint32_t>(fileName.size()));
     request.insert(request.end(), fileName.begin(), fileName.end());
+    std::cout << "[client] >> sendPayload (READ)" << std::endl; // DEBUG: added
     if (!state.connection.sendPayload(request)) return;
 
     std::vector<uint8_t> response;
+    std::cout << "[client] << receivePayload (READ)" << std::endl; // DEBUG: added
     if (!state.connection.receivePayload(response)) return;
 
     size_t offset = 0;
@@ -155,8 +161,10 @@ void FileManager::writeFile(string fileName, vector<unsigned char>& data) {
     appendUint32(request, static_cast<uint32_t>(fileName.size()));
     request.insert(request.end(), fileName.begin(), fileName.end());
     appendVector(request, data);
+    std::cout << "[client] >> sendPayload (WRITE)" << std::endl; // DEBUG: added
     if (!state.connection.sendPayload(request)) return;
 
     std::vector<uint8_t> response;
+    std::cout << "[client] << receivePayload (WRITE)" << std::endl; // DEBUG: added
     state.connection.receivePayload(response);
 }
