@@ -94,11 +94,11 @@ Si implementas el broker de asignación de servidores:
 4. Los clientes deben primero conectarse al broker para obtener IP/puerto de servidor y, a continuación, establecer la conexión directa con ese servidor.
 5. Comportamiento esperado: reparto de carga entre servidores y posible divergencia de contenidos entre los distintos `FileManagerDir` (cada servidor mantiene su propia copia). Coordina los tests teniendo esto en cuenta.
 
-## Ficheros proporcionados por la universidad
-- `main_fm.cpp` (no modificable)
-- `filemanager.h` (no modificable)
-- `libFileManager.a` (no modificable)
-- Proyecto base de CMake (`CMakeLists.txt` inicial)
+## Files Provided by the University
+- `main_fm.cpp` (not modifiable)
+- `fileManager.h` (not modifiable)
+- `libFileManager.a` (not modifiable)
+- Base CMake project (`CMakeLists.txt` initial)
 
 ## Ficheros a implementar por el estudiantado
 - `client/fileManagerRemoto.cpp`
