@@ -46,7 +46,7 @@ FileManager::FileManager(std::string path) : dirPath(path), ready(false) {
     int port = env_or_int("FILEMGR_PORT", 5001);
     LogConfig cfg;
     cfg.role = "C";
-    std::string lvl = env_or("FILEMGR_LOG", "info");
+    std::string lvl = env_or("FILEMGR_LOG", "0");
     cfg.level = level_from_string(lvl);
     init_log(cfg);
     auto ch = std::make_unique<RpcChannel>(host, port, "C");
@@ -56,7 +56,7 @@ FileManager::FileManager(std::string path) : dirPath(path), ready(false) {
     if (resp.opcode == RpcOp::CTOR && !resp.payload.empty() && resp.payload[0] == 0) {
         ready = true;
         set_channel(this, std::move(ch));
-        LOG_INFO("C", channel_for(this)->conn_id(), "CTOR", "remote ctor ok dir=" << path);
+        LOG_DEBUG("C", channel_for(this)->conn_id(), "CTOR", "remote ctor ok dir=" << path);
     } else {
         LOG_ERR("C", ch->conn_id(), "CTOR", "ctor failed");
     }
@@ -111,7 +111,7 @@ void FileManager::readFile(string fileName, vector<unsigned char> &data) {
         uint32_t len = read_u32(resp.payload, off);
         auto bytes = slice_payload(resp.payload, off, len);
         data.assign(bytes.begin(), bytes.end());
-        LOG_INFO("C", ch->conn_id(), "DOWNLOAD", "received bytes=" << data.size());
+        LOG_DEBUG("C", ch->conn_id(), "DOWNLOAD", "received bytes=" << data.size());
     } catch (const std::exception &e) {
         LOG_ERR("C", ch->conn_id(), "DOWNLOAD", "decode error " << e.what());
     }
@@ -132,7 +132,7 @@ void FileManager::writeFile(string fileName, vector<unsigned char> &data) {
             return;
         }
         uint32_t status = read_u32(resp.payload, off);
-        LOG_INFO("C", ch->conn_id(), "UPLOAD", "status=" << status << " bytes=" << data.size());
+        LOG_DEBUG("C", ch->conn_id(), "UPLOAD", "status=" << status << " bytes=" << data.size());
     } catch (const std::exception &e) {
         LOG_ERR("C", ch->conn_id(), "UPLOAD", "decode error " << e.what());
     }

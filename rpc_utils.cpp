@@ -50,7 +50,7 @@ bool send_frame(int fd, RpcOp op, const std::vector<uint8_t> &payload, const std
     header[4] = static_cast<uint8_t>(op);
     if (!write_exact(fd, header.data(), header.size(), role, connId, opName)) return false;
     if (!payload.empty() && !write_exact(fd, payload.data(), payload.size(), role, connId, opName)) return false;
-    LOG_INFO(role, connId, opName, "sent frame opcode=" << static_cast<int>(op) << " payload=" << payload.size());
+    LOG_DEBUG(role, connId, opName, "sent frame opcode=" << static_cast<int>(op) << " payload=" << payload.size());
     return true;
 }
 
@@ -70,7 +70,7 @@ bool recv_frame(int fd, RpcFrame &frame, const std::string &role, int connId) {
         if (!read_exact(fd, payload.data(), payload.size(), role, connId, "frame-payload")) return false;
     }
     frame.payload = std::move(payload);
-    LOG_INFO(role, connId, "recv", "frame opcode=" << static_cast<int>(frame.opcode) << " payload=" << frame.payload.size());
+    LOG_DEBUG(role, connId, "recv", "frame opcode=" << static_cast<int>(frame.opcode) << " payload=" << frame.payload.size());
     return true;
 }
 
